@@ -1,4 +1,6 @@
 HELP.md
+
+### Compiled ###
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -14,7 +16,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -31,3 +33,26 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Environment ###
+.env
+.env.*
+
+### Secrets & Credentials ###
+*secret*
+*credentials*
+*password*
+application-prod.yml
+application-production.yml
+
+### Logs ###
+*.log
+logs/
+
+### Temp ###
+*.tmp
+*.swp
