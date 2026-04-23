@@ -30,3 +30,16 @@ management:
     web:
       exposure:
         include: health, info
+
+logging:
+  file:
+    name: logs/api-gateway.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/api-gateway-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 500MB
+  level:
+    root: INFO
+    com.paymentgateway: DEBUG
