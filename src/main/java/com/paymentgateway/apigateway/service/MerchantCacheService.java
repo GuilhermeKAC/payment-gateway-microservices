@@ -41,7 +41,6 @@ public class MerchantCacheService {
     private Mono<MerchantContext> mockMerchant(String apiKey) {
         MerchantContext merchant = MerchantContext.builder()
                 .merchantId("merchant-001")
-                .apiKey(apiKey)
                 .status("ACTIVE")
                 .build();
 

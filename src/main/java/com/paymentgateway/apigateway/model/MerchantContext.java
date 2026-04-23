@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MerchantContext {
     private String merchantId;
-    private String apiKey;
     private String status;
 }
