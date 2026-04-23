@@ -1,5 +1,7 @@
 package com.paymentgateway.apigateway.filter;
 
+import com.paymentgateway.apigateway.service.MerchantCacheService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -11,10 +13,13 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final String API_KEY_HEADER = "X-API-Key";
     private static final String MERCHANT_ID_HEADER = "X-Merchant-Id";
+
+    private final MerchantCacheService merchantCacheService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -26,18 +31,26 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        log.info("Request authenticated with api_key: {}...", apiKey.substring(0, 8));
+        return merchantCacheService.findByApiKey(apiKey)
+                .flatMap(merchant -> {
+                    if (!"ACTIVE".equals(merchant.getStatus())) {
+                        log.warn("Request rejected: merchant {} is {}", merchant.getMerchantId(), merchant.getStatus());
+                        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                        return exchange.getResponse().setComplete();
+                    }
 
-        // Por enquanto só valida presença — no próximo passo buscaremos no Redis
-        ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(r -> r.header(MERCHANT_ID_HEADER, "merchant-placeholder"))
-                .build();
+                    log.info("Request authorized for merchant: {}", merchant.getMerchantId());
 
-        return chain.filter(mutatedExchange);
+                    ServerWebExchange mutatedExchange = exchange.mutate()
+                            .request(r -> r.header(MERCHANT_ID_HEADER, merchant.getMerchantId()))
+                            .build();
+
+                    return chain.filter(mutatedExchange);
+                });
     }
 
     @Override
     public int getOrder() {
-        return -100; // número menor = executa primeiro
+        return -100;
     }
 }
